@@ -1,2 +1,0 @@
-# biu
-my bioinformatics utilities
