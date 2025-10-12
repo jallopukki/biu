@@ -1,63 +1,49 @@
-# biu
+# **BIU**
 
-Utilities for work with DNA or RNA sequenses and FASTQ.
+A set of utilities for processing biological data: FASTA transformation, BLAST parsing, FASTQ filtering, and nucleotide sequence tools.
 
-## Installation and Requirments
 
-Just copy the folder and work with "main.py". It contains imports and two functions "run_dna_rna_tools" and "filer_fastq". There are no dependencies - only the Python standard library.
 
-Python 3.x (tested on Python 3.8 and above).
 
-## Usage
+### **Installation and requirments**
 
-### 1. Work with DNA or RNA
+Copy the folder and work with `biu`. Python 3.x (tested on Python 3.8 and above).
 
-"run_dna_rna_tools" takes as input a DNA or RNA sequence (str), as well as the name of the procedure to be performed ('is_nucleic_acid', 'transcribe', 'reverse', 'complement', 'reverse_complement')
 
-### Validation RNA or DNA. Return bool result.
 
-run_dna_rna_tools('TTUU', 'is_nucleic_acid') \# → False run_dna_rna_tools('TTAA', 'is_nucleic_acid') \# → TRUE
 
-### Make a T to U substitution. Returns the transcribed sequence (DNA → RNA)
 
-run_dna_rna_tools('ATGC', 'transcribe') \# → 'AUGC'
+###  **`main.py`** 
 
-### Return the reversed (mirror) sequence.
 
-run_dna_rna_tools('ATG', 'reverse') \# → 'GTA'
+1. **`run_dna_rna_tools`** takes as input a DNA or RNA sequence (str), as well as the name of the procedure to be performed ('is_nucleic_acid', 'transcribe', 'reverse', 'complement', 'reverse_complement')
 
-### Return the complementary sequence.
+    - `is_nucleic_acid` Validation RNA or DNA. Return bool result.
+    - `transcribe` Make a T to U substitution. Returns the transcribed sequence.
+    - `reverse` Return the reversed (mirror) sequence. 
+    - `complement` Return the complementary sequence. 
+    - `reverse_complement` Return the reverse complementary sequence. 
 
-run_dna_rna_tools('AtG', 'complement') \# → 'TaC'
+    *example of usage: run_dna_rna_tools('TTUU', 'is_nucleic_acid')*
 
-### Return the reverse complementary sequence.
 
-run_dna_rna_tools('ATg', 'reverse_complement') \# → 'cAT'
+2. **`filter_fastq`** uses *.fastq and *.fasta files and save them into filtered data ./filtered.
 
-###When you have two or more sequenses.
 
-run_dna_rna_tools('ATG', 'aT', 'reverse') \# → ['GTA', 'Ta']
+### **`bio_files_processor.py`**
 
-### 2. Work with FASTQ
+1) FASTA: Convert multiline format to single line per sequence.
+2) BLAST: Extract unique annotations from text report.
+3) FASTQ: Filter reads by GC content, length, and quality.
 
-"filer_fastq" takes 4 arguments: seqs, gc_bounds, length_bounds, quality_threshold)
 
-seqs = dict.
+### **Autor**
 
-gc_bounds=(0, 100), by default all reads are preserved. If a single number is passed as an argument, it is considered the upper limit.
+Loginova Olga
 
-length_bounds=(0, 2\*\*32), by default all reads are preserved. If a single number is passed as an argument, it is considered the upper limit.
 
-quality_threshold=0.0, the average read quality threshold for filtering is 0 by default (phred33 scale). Reads with an average quality for all nucleotides below the threshold are discarded.
 
-## Team
 
-Loginova Olga and web :)
-
-## Citation
-
-If you use theese tools in your work, please cite [<https://github.com/jallopukki/biu.git>].
-
-## Feedback and bug reports
+### **Feedback and bug reports**
 
 If you have any troubles running tools, please attach params.txt
