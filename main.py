@@ -1,22 +1,23 @@
 from pathlib import Path
 from typing import List, Union, Dict, Tuple
 import sys
+import os
+
 
 sys.path.append("./modules")
-
 
 from modules.run_dna_rna_tools import (
     transcribe,
     reverse,
     complement,
     reverse_complement,
+    is_nucleic_acid,
 )
 
 from modules.filter_fastq import (
     filter_fastq as _filter_fastq,
     write_fastq,
 )
-
 
 DATA_DIR = Path("data")
 FILTERED_DIR = Path("filtered")
@@ -35,9 +36,8 @@ def run_dna_rna_tools(*args: str) -> Union[bool, str, List[Union[str, bool]]]:
 
     Returns:
         bool: if operation is 'is_nucleic_acid' and one sequence given.
-        str: if single sequence and List[str] if multiple sequences.
+        str or List[str/bool]: result for one or multiple sequences.
     """
-
     *seqs, operation = args
 
     operations = {
@@ -49,7 +49,6 @@ def run_dna_rna_tools(*args: str) -> Union[bool, str, List[Union[str, bool]]]:
     }
 
     func = operations[operation]
-    resperations[operation]
     result = [func(seq) for seq in seqs]
 
     return result[0] if len(result) == 1 else result
@@ -57,17 +56,16 @@ def run_dna_rna_tools(*args: str) -> Union[bool, str, List[Union[str, bool]]]:
 
 def filter_fastq(
     input_fastq: str,
-    output_fastq: str = None,
+    output_fastq: str = "filtered/output_fastq.fastq",
     gc_bounds=(0, 100),
     length_bounds=(0, 2**32),
     quality_threshold=0.0,
 ) -> dict:
     """
     Filter FASTQ reads by GC content, length, and quality.
-    Reads from input_fastq, applies filters, optionally writes to output_fastq.
-
-    Returns:
-        dict: filtered reads as {read_name: (sequence, quality)}
+    Saves to output_fastq (default: 'filtered/output_fastq.fastq').
+    Returns dict of filtered reads: {read_name: (sequence, quality)},
+    where read_name includes the '@' symbol.
     """
     filtered_reads = _filter_fastq(
         input_fastq=input_fastq,
@@ -77,29 +75,25 @@ def filter_fastq(
     )
 
     if output_fastq is not None:
+        os.makedirs(os.path.dirname(output_fastq), exist_ok=True)
         write_fastq(output_fastq, filtered_reads)
 
     return filtered_reads
 
-    # этот блок мне сделал жипити, спас меня от мучений запуска.
-    # В терминале классно выглядит, можно оставить, а!? (на рус) пжлст
-
 
 if __name__ == "__main__":
-    print("Запуск фильтрации...")
+    print("Start filtration...")
     input_path = "data/example_fastq.fastq"
-    output_path = "filtered/output_fastq.fastq"
 
     result = filter_fastq(
         input_fastq=input_path,
-        output_fastq=output_path,
         gc_bounds=(0, 100),
         length_bounds=(0, 10000),
         quality_threshold=0.0,
     )
 
-    print(f"✅ Отфильтровано {len(result)} ридов.")
+    print(f"✅ {len(result)} reads were filtered.")
     if result:
-        print(f"Файл сохранён: {output_path}")
+        print(f"File saved: filtered/output_fastq.fastq")
     else:
-        print("⚠️  Результат пуст — проверьте входной файл или параметры.")
+        print("⚠️  Empty result — check input file or parameters.")
