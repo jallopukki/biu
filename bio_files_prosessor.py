@@ -121,15 +121,14 @@ def parse_blast_output(input_file: str, output_file: str):
 if __name__ == "__main__":
     RESULTS_DIR.mkdir(exist_ok=True)
 
-    # а здесь я уже сама-сама))
     out_fasta = convert_multiline_fasta_to_oneline(str(input_fasta), str(output_fasta))
-    print("Запускаю конвертацию одна последовательность - одна строка...")
-    print(f"✅ FASTA сформирован и сохранен в: {out_fasta}")
+    print("Start convertation: one sequense - one line...")
+    print(f"✅ FASTA is formed and saved: {out_fasta}")
 
     if input_file.exists():
         parse_blast_output(str(input_file), str(output_file))
-        print("Отбираю первые строки из столбца Description...")
-        print("Сохраняю набор полученных белков в новый файл в алфавитном порядке...")
-        print(f"✅ результаты BLAST сохранены в: {output_file}")
+        print("Select the first rows from the column Description...")
+        print("Save the set of proteins into new file (alphabetical order)...")
+        print(f"✅ BLAST rersults are saved: {output_file}")
     else:
-        print(f"⚠️  отсутствует BLAST файл: {input_file}")
+        print(f"⚠️  BLAST file is missing: {input_file}")
