@@ -1,69 +1,99 @@
+from pathlib import Path
+from typing import List, Union, Dict, Tuple
+import sys
+import os
+
+
+sys.path.append("./modules")
+
 from modules.run_dna_rna_tools import (
     transcribe,
     reverse,
     complement,
     reverse_complement,
+    is_nucleic_acid,
 )
-from modules.filter_fastq import mean_quality
+
+from modules.filter_fastq import (
+    filter_fastq as _filter_fastq,
+    write_fastq,
+)
+
+DATA_DIR = Path("data")
+FILTERED_DIR = Path("filtered")
+DEFAULT_INPUT = DATA_DIR / "example_fastq.fastq"
+DEFAULT_OUTPUT = FILTERED_DIR / "output_fastq.fastq"
 
 
-def run_dna_rna_tools(*args):
+def run_dna_rna_tools(*args: str) -> Union[bool, str, List[Union[str, bool]]]:
+    """
+    Tools for working with RNA/DNA sequences.
+
+    Args:
+        *args: One or more sequences, followed by an operation name.
+               Supported operations: 'is_nucleic_acid', 'transcribe',
+               'reverse', 'complement', 'reverse_complement'.
+
+    Returns:
+        bool: if operation is 'is_nucleic_acid' and one sequence given.
+        str or List[str/bool]: result for one or multiple sequences.
+    """
     *seqs, operation = args
-    result = []
-    """Tools for working with RNA/DNA sequences."""
 
-    for seq in seqs:
-        if operation == "is_nucleic_acid":
-            """Validation RNA or DNA. Return bool result"""
-            valid_letters = set("ATGCUatgcu")
-            return all(char in valid_letters for char in seq) and not (
-                "T" in seq.upper() and "U" in seq.upper()
-            )
-        elif operation == "transcribe":
-            result.append(transcribe(seq))
-        elif operation == "reverse":
-            result.append(reverse(seq))
-        elif operation == "complement":
-            result.append(complement(seq))
-        elif operation == "reverse_complement":
-            result.append(complement(reverse(seq)))
+    operations = {
+        "is_nucleic_acid": is_nucleic_acid,
+        "transcribe": transcribe,
+        "reverse": reverse,
+        "complement": complement,
+        "reverse_complement": reverse_complement,
+    }
 
-    if len(result) == 1:
-        return result[0]
-    else:
-        return result
+    func = operations[operation]
+    result = [func(seq) for seq in seqs]
+
+    return result[0] if len(result) == 1 else result
 
 
 def filter_fastq(
-    seqs, gc_bounds=(0, 100), length_bounds=(0, 2**32), quality_threshold=0.0
-):
-    """Filters FASTQ sequences based on GC content, length, and quality."""
+    input_fastq: str,
+    output_fastq: str = "filtered/output_fastq.fastq",
+    gc_bounds=(0, 100),
+    length_bounds=(0, 2**32),
+    quality_threshold=0.0,
+) -> dict:
+    """
+    Filter FASTQ reads by GC content, length, and quality.
+    Saves to output_fastq (default: 'filtered/output_fastq.fastq').
+    Returns dict of filtered reads: {read_name: (sequence, quality)},
+    where read_name includes the '@' symbol.
+    """
+    filtered_reads = _filter_fastq(
+        input_fastq=input_fastq,
+        gc_bounds=gc_bounds,
+        length_bounds=length_bounds,
+        quality_threshold=quality_threshold,
+    )
 
-    def normalize_bounds(bounds):
-        if isinstance(bounds, (int, float)):
-            return (0.0, float(bounds))
-        return (float(bounds[0]), float(bounds[1]))
+    if output_fastq is not None:
+        os.makedirs(os.path.dirname(output_fastq), exist_ok=True)
+        write_fastq(output_fastq, filtered_reads)
 
-    gc_min, gc_max = normalize_bounds(gc_bounds)
-    len_min, len_max = normalize_bounds(length_bounds)
-    filtered = {}
+    return filtered_reads
 
-    for name, (seq, quality) in seqs.items():
-        if not seq:
-            continue
 
-        """Calculate GC (%)."""
-        gc_percentage = (
-            (seq.upper().count("G") + seq.upper().count("C")) / len(seq) * 100
-        )
-        length = len(seq)
-        avg_qual = mean_quality(quality)
+if __name__ == "__main__":
+    print("Start filtration...")
+    input_path = "data/example_fastq.fastq"
 
-        if (
-            gc_min <= gc_percentage <= gc_max
-            and len_min <= length <= len_max
-            and avg_qual >= quality_threshold
-        ):
-            filtered[name] = (seq, quality)
+    result = filter_fastq(
+        input_fastq=input_path,
+        gc_bounds=(0, 100),
+        length_bounds=(0, 10000),
+        quality_threshold=0.0,
+    )
 
-    return filtered
+    print(f"✅ {len(result)} reads were filtered.")
+    if result:
+        print(f"File saved: filtered/output_fastq.fastq")
+    else:
+        print("⚠️  Empty result — check input file or parameters.")

@@ -1,15 +1,23 @@
+def is_nucleic_acid(seq: str) -> bool:
+    "Validation RNA or DNA. Return bool result"
+    valid_letters = set("ATGCUatgcu")
+    return all(char in valid_letters for char in seq) and not (
+        "T" in seq.upper() and "U" in seq.upper()
+    )
+
+
 def transcribe(seq: str) -> str:
-    """Makes a T to U substitution. Returns the transcribed sequence."""
+    "Makes a T to U substitution. Returns the transcribed sequence."
     return seq.replace("T", "U").replace("t", "u")
 
 
 def reverse(seq: str) -> str:
-    """Returns the reversed (mirror) sequence."""
+    "Returns the reversed (mirror) sequence."
     return seq[::-1]
 
 
 def complement(seq: str) -> str:
-    """Returns the complementary sequence."""
+    "Returns the complementary sequence."
     upper_seq = seq.upper()
     if "U" in upper_seq:
         table = str.maketrans("AUGCaugc", "UACGuacg")
@@ -19,5 +27,5 @@ def complement(seq: str) -> str:
 
 
 def reverse_complement(seq: str) -> str:
-    """Returns the reverse complementary sequence."""
+    "Returns the reverse complementary sequence."
     return complement(reverse(seq))
