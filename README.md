@@ -1,49 +1,80 @@
+---
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
 # **BIU**
 
-A set of utilities for processing biological data: FASTA transformation, BLAST parsing, FASTQ filtering, and nucleotide sequence tools.
+Tool for work with biological sequences: FASTA transformation, BLAST
+parsing, FASTQ filtering, and nucleotide sequence tools.\
+**biu**/\
+├── main.py\
+├── requirements.txt\
+├── data/\
+└── filtered/\
 
+**Installation**
 
+-   Clone repository `bash`\
+    `git clone <repository_url>`\
+    `cd biu`\
+-   Create or/and activate virtual environment\
+    `python3 -m venv venv`\
+    `source venv/bin/activate`\
+-   Install dependencies\
+    `pip install -r requirements.txt`\
+-   Run\
+    `python main.py`\
 
+**Usage**
 
-### **Installation and requirments**
+==== For DNA ====\
+`from main import DNASequence`\
+dna = DNASequence("ATGCATGC")\
+dna.complement() \# TACGTACG\
+dna.reverse() \# CGTACGTA\
+dna.reverse_complement() \# GCATGCAT\
+dna.transcribe() \# RNASequence("AUGCAUGC")\
+\
+==== For RNA ====\
+`from main import RNASequence`\
+rna = RNASequence("AUGCAUGC")\
+rna.complement() \# UACGUACG\
+\
+==== For Proteins ====\
+`from main import AminoAcidSequence`\
+protein = AminoAcidSequence("ACDEFGHIK")\
+protein.count_amino_acids() \# =\> AA number\
+\
+==== Filtering reads by GC content, length, and quality: ====\
+`from main import filter_fastq`
 
-Copy the folder and work with `biu`. Python 3.x (tested on Python 3.8 and above).
+result = filter_fastq(input_fastq="data/example_fastq.fastq",
+output_fastq="filtered/output_fastq.fastq", gc_bounds=(40, 60),
+length_bounds=(100, 10000), quality_threshold=20.0, )\
 
+==== FASTA and BLAS processing: ====\
+`from main import convert_multiline_fasta_to_oneline, parse_blast_output`
 
+FASTA conversion: multiline → one line per sequence
+convert_multiline_fasta_to_oneline("data/input.fasta",
+"filtered/oneline.fasta")
 
+BLAST parsing: extracting unique protein descriptions
+parse_blast_output("data/blast_results.txt",
+"filtered/blast_parsed.txt")\
 
+**Requirements**
 
-###  **`main.py`** 
+-   Python 3.8+
 
+-   Biopython 1.81+
 
-1. **`run_dna_rna_tools`** takes as input a DNA or RNA sequence (str), as well as the name of the procedure to be performed ('is_nucleic_acid', 'transcribe', 'reverse', 'complement', 'reverse_complement')
-
-    - `is_nucleic_acid` Validation RNA or DNA. Return bool result.
-    - `transcribe` Make a T to U substitution. Returns the transcribed sequence.
-    - `reverse` Return the reversed (mirror) sequence. 
-    - `complement` Return the complementary sequence. 
-    - `reverse_complement` Return the reverse complementary sequence. 
-
-    *example of usage: run_dna_rna_tools('TTUU', 'is_nucleic_acid')*
-
-
-2. **`filter_fastq`** uses *.fastq and *.fasta files and save them into filtered data ./filtered.
-
-
-### **`bio_files_processor.py`**
-
-1) FASTA: Convert multiline format to single line per sequence.
-2) BLAST: Extract unique annotations from text report.
-3) FASTQ: Filter reads by GC content, length, and quality.
-
-
-### **Autor**
+**Author**
 
 Loginova Olga
 
-
-
-
-### **Feedback and bug reports**
+**Feedback and bug reports**
 
 If you have any troubles running tools, please attach params.txt
