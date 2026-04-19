@@ -1,2 +1,7 @@
-modules/__pycache__/
-filtered/hello.txt
+__pycache__/
+*.pyc
+*.log
+filtered/
+.pytest_cache/
+.vscode/
+.idea/
